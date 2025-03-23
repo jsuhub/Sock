@@ -1,8 +1,8 @@
 package main
 
 import (
-	"LocalSock/tcp"
-	"LocalSock/utils"
+	"ServerSock/tcp"
+	"ServerSock/utils"
 	"flag"
 	"fmt"
 	"log"
@@ -14,18 +14,18 @@ import (
 func main() {
 
 	var flags struct {
-		Cipher  string
-		Port    string
-		Key     string
-		Keygen  int
-		SerAddr string
-		TCP     bool
-		UDP     bool
-		Socks   bool
+		Cipher string
+		Port   string
+		Key    string
+		Keygen int
+		TCP    bool
+		UDP    bool
+		Socks  bool
 	}
 
 	flag.StringVar(&flags.Key, "key", "", "Password")
-	flag.StringVar(&flags.Port, "p", "8888", "Port")
+	flag.StringVar(&flags.Port, "p", "8886", "Port")
+	//表示服务端的监听端口号
 	flag.StringVar(&flags.Cipher, "cipher", "AEAD_AES_256_GCM", "cipher")
 	flag.BoolVar(&flags.TCP, "tcp", false, "tcp")
 	flag.BoolVar(&flags.UDP, "udp", false, "udp")
@@ -46,7 +46,7 @@ func main() {
 	if flags.TCP {
 
 		//SerAddr 表示服务端目标 Port 表示客户端监听的端口 ciph表示加密
-		go tcp.LocalTCP(flags.SerAddr, flags.Port, ciph)
+		go tcp.ServerTCP(flags.Port, ciph)
 
 	}
 	sigCh := make(chan os.Signal, 1)
