@@ -8,7 +8,8 @@ import (
 )
 
 func ServerTCP(port string, cipher utils.Cipher) {
-	listener, err := net.Listen("tcp", "127.0.0.1:"+port)
+	log.Println("0.0.0.0:" + port)
+	listener, err := net.Listen("tcp", "0.0.0.0:"+port)
 	defer listener.Close()
 	if err != nil {
 		log.Fatal("Server_listing_fail:%v", err)
@@ -22,16 +23,17 @@ func ServerTCP(port string, cipher utils.Cipher) {
 		}
 		traget := make([]byte, 64)
 		n, err := lc.Read(traget)
+		if err != nil {
+			log.Fatal("Server_traget_fail:%v", err)
+		}
 		tragets, port, err := parseAddr(traget[:n])
-		if err != nil {
-			log.Fatal("Server_traget_fail:%v", err)
-		}
-		log.Println("Server_traget_success", port, tragets)
+
+		log.Println("Server_traget_success", tragets+":"+strconv.Itoa(port))
 		r, err := net.Dial("tcp", tragets+":"+strconv.Itoa(port))
-		log.Println("建立连接成功")
 		if err != nil {
 			log.Fatal("Server_traget_fail:%v", err)
 		}
+		log.Println("建立连接成功")
 		defer r.Close()
 		if err = relay(lc, r); err != nil {
 			log.Fatal("Server_relay_fail:%v", err)

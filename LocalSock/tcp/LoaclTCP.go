@@ -35,14 +35,16 @@ func LocalTCP(server, localport string, ciph utils.Cipher) {
 		}
 		traget_s := req.Host
 		traget := parse(traget_s)
-		log.Println("Traget:", traget)
 		if err != nil {
 			continue
 		}
 
 		go func() {
 			defer conn.Close()
-			r, err := net.Dial("tcp", "127.0.0.1:8886")
+			log.Println(traget)
+			log.Println("Local tcp connect to", server)
+			r, err := net.Dial("tcp", server)
+
 			defer r.Close()
 			log.Println("Dial ok")
 			rc := ciph.StreamConn(r)
@@ -51,6 +53,7 @@ func LocalTCP(server, localport string, ciph utils.Cipher) {
 				return
 			}
 			rc.Write(read)
+			
 			log.Println("client write ok")
 			time.Sleep(5 * time.Second)
 			read = make([]byte, 1024)

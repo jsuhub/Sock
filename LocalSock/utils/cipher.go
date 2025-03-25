@@ -60,10 +60,15 @@ func NewCipher(method string, password string) (cipher Cipher, err error) {
 	//&相当于NEW
 }
 
-func increasePasswd(password []byte) []byte {
-	salt := []byte("random_salt")
+func increasePasswd(password []byte) (key []byte) {
+	var salt = []byte{
+		0x7a, 0x31, 0x9c, 0x8d, 0xaf, 0x43, 0x76, 0x55,
+		0x88, 0xe2, 0x0f, 0x99, 0x34, 0xc1, 0x6a, 0x12,
+		0x58, 0x6d, 0xa9, 0x7b, 0x40, 0xcd, 0x28, 0xee,
+		0x91, 0x2a, 0x6b, 0xfa, 0x13, 0xf0, 0x2d, 0xc3,
+	}
 	iterations := 100000
 	keyLen := 32 // 256 位
-	key := pbkdf2.Key(password, salt, iterations, keyLen, sha256.New)
+	key = pbkdf2.Key(password, salt, iterations, keyLen, sha256.New)
 	return key
 }

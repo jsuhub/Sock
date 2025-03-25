@@ -23,9 +23,9 @@ func main() {
 		UDP     bool
 		Socks   bool
 	}
-
-	flag.StringVar(&flags.Key, "key", "", "Password")
-	flag.StringVar(&flags.Port, "p", "8888", "Port")
+	flag.StringVar(&flags.SerAddr, "server", "52.77.225.164:8388", "cipher to use")
+	flag.StringVar(&flags.Key, "key", "12345678", "Password")
+	flag.StringVar(&flags.Port, "p", "8080", "Port")
 	flag.StringVar(&flags.Cipher, "cipher", "AEAD_AES_256_GCM", "cipher")
 	flag.BoolVar(&flags.TCP, "tcp", false, "tcp")
 	flag.BoolVar(&flags.UDP, "udp", false, "udp")
@@ -36,7 +36,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-
+	log.Println(flags.Key)
 	//开始加密，先生成密钥 ——利用密码
 	ciph, err := utils.NewCipher(flags.Cipher, flags.Key)
 	if err != nil {
