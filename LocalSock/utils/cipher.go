@@ -1,11 +1,10 @@
 package utils
 
 import (
-	"crypto/sha256"
+	"crypto/md5"
 	"net"
 
 	"github.com/shadowsocks/go-shadowsocks2/shadowaead"
-	"golang.org/x/crypto/pbkdf2"
 )
 
 /*
@@ -46,29 +45,29 @@ func (aead *aeadCipher) PacketConn(c net.PacketConn) net.PacketConn {
 }
 
 func NewCipher(method string, password string) (cipher Cipher, err error) {
-	var chipher = aeadList[method]
-	passByte := []byte(password)
-	var key = make([]byte, chipher.KeySize)
-	if len(password) < chipher.KeySize {
-		//通过使用KDF把密码加密成密钥
-		key = increasePasswd(passByte)
-	} else {
-		key = passByte[:chipher.KeySize]
-	}
-	aead, err := chipher.New(key)
+	var choice = aeadList[method]
+	var key = make([]byte, choice.KeySize)
+	key = kdf(password, choice.KeySize)
+	aead, err := choice.New(key)
 	return &aeadCipher{aead}, err
 	//&相当于NEW
 }
 
-func increasePasswd(password []byte) (key []byte) {
-	var salt = []byte{
-		0x7a, 0x31, 0x9c, 0x8d, 0xaf, 0x43, 0x76, 0x55,
-		0x88, 0xe2, 0x0f, 0x99, 0x34, 0xc1, 0x6a, 0x12,
-		0x58, 0x6d, 0xa9, 0x7b, 0x40, 0xcd, 0x28, 0xee,
-		0x91, 0x2a, 0x6b, 0xfa, 0x13, 0xf0, 0x2d, 0xc3,
+func kdf(password string, keyLen int) []byte {
+	var b, prev []byte
+	h := md5.New()
+	//生成md5加密器
+	for len(b) < keyLen {
+		h.Write(prev)
+		//把prev写入
+		h.Write([]byte(password))
+		//形成prev+password的格式
+		b = h.Sum(b)
+		//表示使用这两个加密并且添加进去appen[b,preb...]
+		prev = b[len(b)-h.Size():]
+		//prev每次都是加密后添加的部分
+		h.Reset()
 	}
-	iterations := 100000
-	keyLen := 32 // 256 位
-	key = pbkdf2.Key(password, salt, iterations, keyLen, sha256.New)
-	return key
+	return b[:keyLen]
+	//表示返回的长度符合
 }

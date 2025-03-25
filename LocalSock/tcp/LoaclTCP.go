@@ -2,13 +2,8 @@ package tcp
 
 import (
 	"LocalSock/utils"
-	"bufio"
-	"bytes"
-	"fmt"
 	"log"
 	"net"
-	"net/http"
-	"time"
 )
 
 func LocalTCP(server, localport string, ciph utils.Cipher) {
@@ -21,20 +16,12 @@ func LocalTCP(server, localport string, ciph utils.Cipher) {
 	defer l.Close()
 	for {
 		conn, err := l.Accept()
-		read := make([]byte, 1024)
-		n, err := conn.Read(read)
+
+		traget, err := Handshake(conn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		read = read[:n]
-		reader := bufio.NewReader(bytes.NewReader(read))
-		req, err := http.ReadRequest(reader)
-		if err != nil {
-			fmt.Println("Error reading request:", err)
-			return
-		}
-		traget_s := req.Host
-		traget := parse(traget_s)
+		//traget = parse(string(traget))
 		if err != nil {
 			continue
 		}
@@ -44,7 +31,6 @@ func LocalTCP(server, localport string, ciph utils.Cipher) {
 			log.Println(traget)
 			log.Println("Local tcp connect to", server)
 			r, err := net.Dial("tcp", server)
-
 			defer r.Close()
 			log.Println("Dial ok")
 			rc := ciph.StreamConn(r)
@@ -52,18 +38,20 @@ func LocalTCP(server, localport string, ciph utils.Cipher) {
 				log.Println("tcp conn write err: %v", err)
 				return
 			}
-			rc.Write(read)
-			
-			log.Println("client write ok")
-			time.Sleep(5 * time.Second)
-			read = make([]byte, 1024)
-			n, err := rc.Read(read)
-			if err != nil {
-				log.Fatal("tcp conn read err: %v", err)
+			log.Println("proxy %s <-> %s <-> %s", rc.RemoteAddr(), server, traget)
+			if err = relay(conn, rc); err != nil {
+				log.Fatal("relay error: %v", err)
 			}
-			read = read[:n]
-			log.Println("client read ok")
-			conn.Write(read)
+
+			//time.Sleep(5 * time.Second)
+			//read := make([]byte, 1024)
+			//n, err := rc.Read(read)
+			//if err != nil {
+			//	log.Fatal("tcp conn read err: %v", err)
+			//}
+			//read = read[:n]
+			//log.Println("client read ok")
+			//conn.Write(read)
 
 		}()
 

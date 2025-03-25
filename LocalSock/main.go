@@ -25,7 +25,7 @@ func main() {
 	}
 	flag.StringVar(&flags.SerAddr, "server", "52.77.225.164:8388", "cipher to use")
 	flag.StringVar(&flags.Key, "key", "12345678", "Password")
-	flag.StringVar(&flags.Port, "p", "8080", "Port")
+	flag.StringVar(&flags.Port, "p", "1080", "Port")
 	flag.StringVar(&flags.Cipher, "cipher", "AEAD_AES_256_GCM", "cipher")
 	flag.BoolVar(&flags.TCP, "tcp", false, "tcp")
 	flag.BoolVar(&flags.UDP, "udp", false, "udp")
